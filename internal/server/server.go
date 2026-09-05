@@ -4,17 +4,21 @@ import (
 	"fmt"
 	"log"
 	"time"
-	"github.com/gin-gonic/gin"
+
 	"github.com/XIAOR1Ck/localsewa-backend/internal/config"
+	"github.com/XIAOR1Ck/localsewa-backend/internal/handlers"
+	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
 	engine *gin.Engine
 	config *config.Config
+	authHandler *handlers.AuthHandler
 }
 
 func NewServer (
 	cfg *config.Config,
+	authHandler *handlers.AuthHandler,
 	//add handlers here when done
 ) *Server {
 // Set Gin mode based on environment
@@ -40,6 +44,14 @@ func NewServer (
         })
     })
 
+	api := engine.Group("/api/v1") 
+	{
+		auth := api.Group("/auth") 
+		{
+			auth.POST("/user/register", authHandler.EmailRegister)
+		}
+	}
+
 
 	// Add other required things here after this like groups etc
 
@@ -47,6 +59,7 @@ func NewServer (
 return &Server{
         engine: engine,
         config: cfg,
+				authHandler: authHandler,
     }
 }
 
