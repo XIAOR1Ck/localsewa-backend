@@ -1,5 +1,5 @@
 package firebase
- 
+
 import (
 	"context"
 	"fmt"

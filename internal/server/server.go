@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/XIAOR1Ck/localsewa-backend/internal/config"
+	"github.com/XIAOR1Ck/localsewa-backend/internal/db"
 	"github.com/XIAOR1Ck/localsewa-backend/internal/handlers"
 	"github.com/gin-gonic/gin"
 )
@@ -14,11 +15,13 @@ type Server struct {
 	engine *gin.Engine
 	config *config.Config
 	authHandler *handlers.AuthHandler
+	querier *db.Queries
 }
 
 func NewServer (
 	cfg *config.Config,
 	authHandler *handlers.AuthHandler,
+	querier *db.Queries,
 	//add handlers here when done
 ) *Server {
 // Set Gin mode based on environment
@@ -60,6 +63,7 @@ return &Server{
         engine: engine,
         config: cfg,
 				authHandler: authHandler,
+				querier: querier,
     }
 }
 

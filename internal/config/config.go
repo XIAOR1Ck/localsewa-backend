@@ -24,7 +24,7 @@ func Load() *Config {
 
     return &Config{
         ServerPort:          getEnv("SERVER_PORT", "8081"),
-        DatabaseURL:         getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/yourdb?sslmode=disable"),
+      	DatabaseURL:         getEnv("GOOSE_DBSTRING", ""),
         FirebaseCredentials: getEnv("FIREBASE_CREDENTIALS", ""),
         Environment:         getEnv("ENVIRONMENT", "development"),
         LoggerLevel:         getEnv("LOGGER_LEVEL", "info"),
