@@ -14,13 +14,13 @@ import (
 type Server struct {
 	engine *gin.Engine
 	config *config.Config
-	authHandler *handlers.AuthHandler
+	handlers *handlers.Handlers
 	querier *db.Queries
 }
 
 func NewServer (
 	cfg *config.Config,
-	authHandler *handlers.AuthHandler,
+	handlers *handlers.Handlers,
 	querier *db.Queries,
 	//add handlers here when done
 ) *Server {
@@ -51,7 +51,7 @@ func NewServer (
 	{
 		auth := api.Group("/auth") 
 		{
-			auth.POST("/user/register", authHandler.EmailRegister)
+			auth.POST("/user/register", handlers.AuthHandler.EmailRegister)
 		}
 	}
 
@@ -62,7 +62,7 @@ func NewServer (
 return &Server{
         engine: engine,
         config: cfg,
-				authHandler: authHandler,
+				handlers: handlers,
 				querier: querier,
     }
 }

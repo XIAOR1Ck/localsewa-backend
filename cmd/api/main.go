@@ -38,11 +38,11 @@ func main() {
 
 
 	//Handlers	
-	authHandler := handlers.NewAuthHandler(svc.AuthService)
+	handlers := handlers.InitHandlers(svc)
 
 	
     // Setup server
-	srv := server.NewServer(cfg, authHandler, querier)
+	srv := server.NewServer(cfg, handlers, querier)
 
     // Start server
     if err := srv.Start(); err != nil {

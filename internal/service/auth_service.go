@@ -34,11 +34,11 @@ func (s *AuthService) VerifyToken(ctx context.Context, idToken string) (*auth.To
 func (s *AuthService) CreateUserWEmail(
 	ctx context.Context,
 	data domain.UserRegister,
-) (db.User, error) {
+) (string, error) {
 
 	client, err := s.firebaseClient.GetAuthClient(ctx)
 	if err != nil {
-		return db.User{}, fmt.Errorf("error fetching auth client: %w", err)
+		return "", fmt.Errorf("error fetching auth client: %w", err)
 	}
 
 	// Create Firebase user
@@ -52,7 +52,7 @@ func (s *AuthService) CreateUserWEmail(
 
 	u, err := client.CreateUser(ctx, params)
 	if err != nil {
-		return db.User{}, fmt.Errorf("error creating user: %w", err)
+		return "", fmt.Errorf("error creating user: %w", err)
 	}
 
 	// Set initial custom claims
@@ -62,12 +62,12 @@ func (s *AuthService) CreateUserWEmail(
 
 	err = client.SetCustomUserClaims(ctx, u.UID, claims)
 	if err != nil {
-		return db.User{}, fmt.Errorf("error setting custom claims: %w", err)
+		return "", fmt.Errorf("error setting custom claims: %w", err)
 	}
 // Fetch the updated UserRecord with custom claims
 u, err = client.GetUser(ctx, u.UID)
 if err != nil {
-	return db.User{}, fmt.Errorf("error fetching updated user: %w", err)
+	return "", fmt.Errorf("error fetching updated user: %w", err)
 }
 
 // Getting data ready
@@ -81,11 +81,17 @@ userData := &db.CreateUserParams{
 
 // Write to database
 
-	user, err := s.repo.CreateUser(ctx, *userData)
+user, err := s.repo.CreateUser(ctx, *userData)
 	if err != nil {
-		return db.User{}, fmt.Errorf("Failed to add user to database: %w", err)
+		return "", fmt.Errorf("Failed to add user to database: %w", err)
 	}
+token, err := client.CustomToken(ctx, u.UID)
+if err != nil {
+	return "", fmt.Errorf("error minting custom token: %w\n", err)
+}
 
-return user, nil
+	fmt.Printf("User: %v", user)
+
+return token, nil
 
 }

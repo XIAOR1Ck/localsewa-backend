@@ -22,12 +22,12 @@ func (h *AuthHandler) EmailRegister (c *gin.Context) {
 c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 	}
-	user, err := h.authService.CreateUserWEmail(c, data)
+	token, err := h.authService.CreateUserWEmail(c, data)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, token)
 
 }
