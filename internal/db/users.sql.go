@@ -7,13 +7,15 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
-  id,
   name,
   email,
+  password,
   phone,
   role
 )
@@ -24,22 +26,22 @@ VALUES (
   $4,
   $5
   )
-RETURNING id, name, email, phone, role, created_at, updated_at
+RETURNING id, name, email, password, phone, role, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	ID    string
-	Name  string
-	Email string
-	Phone string
-	Role  string
+	Name     string
+	Email    string
+	Password string
+	Phone    string
+	Role     UserRole
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
 	row := q.db.QueryRow(ctx, createUser,
-		arg.ID,
 		arg.Name,
 		arg.Email,
+		arg.Password,
 		arg.Phone,
 		arg.Role,
 	)
@@ -48,6 +50,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.ID,
 		&i.Name,
 		&i.Email,
+		&i.Password,
 		&i.Phone,
 		&i.Role,
 		&i.CreatedAt,
@@ -56,25 +59,110 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
-const listUsers = `-- name: ListUsers :many
-SELECT id, name, email, phone, role, created_at, updated_at FROM users
-ORDER BY name
+const deleteUser = `-- name: DeleteUser :exec
+DELETE FROM users
+WHERE id = $1
 `
 
-func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
-	rows, err := q.db.Query(ctx, listUsers)
+func (q *Queries) DeleteUser(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteUser, id)
+	return err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, email, name, role, created_at, updated_at
+FROM users
+WHERE email = $1
+LIMIT 1
+`
+
+type GetUserByEmailRow struct {
+	ID        pgtype.UUID
+	Email     string
+	Name      string
+	Role      UserRole
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+}
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
+	row := q.db.QueryRow(ctx, getUserByEmail, email)
+	var i GetUserByEmailRow
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Name,
+		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getUserByID = `-- name: GetUserByID :one
+SELECT id, email, name, role, created_at, updated_at
+FROM users
+WHERE id = $1
+LIMIT 1
+`
+
+type GetUserByIDRow struct {
+	ID        pgtype.UUID
+	Email     string
+	Name      string
+	Role      UserRole
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+}
+
+func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (GetUserByIDRow, error) {
+	row := q.db.QueryRow(ctx, getUserByID, id)
+	var i GetUserByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Name,
+		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const listUsers = `-- name: ListUsers :many
+SELECT id, email, name, role, created_at, updated_at
+FROM users
+ORDER BY created_at DESC
+LIMIT $1 OFFSET $2
+`
+
+type ListUsersParams struct {
+	Limit  int32
+	Offset int32
+}
+
+type ListUsersRow struct {
+	ID        pgtype.UUID
+	Email     string
+	Name      string
+	Role      UserRole
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+}
+
+func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]ListUsersRow, error) {
+	rows, err := q.db.Query(ctx, listUsers, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []User
+	var items []ListUsersRow
 	for rows.Next() {
-		var i User
+		var i ListUsersRow
 		if err := rows.Scan(
 			&i.ID,
-			&i.Name,
 			&i.Email,
-			&i.Phone,
+			&i.Name,
 			&i.Role,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -87,4 +175,30 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateUser = `-- name: UpdateUser :exec
+UPDATE users
+SET name = $2,
+    email = $3,
+    role = $4,
+    updated_at = NOW()
+WHERE id = $1
+`
+
+type UpdateUserParams struct {
+	ID    pgtype.UUID
+	Name  string
+	Email string
+	Role  UserRole
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
+	_, err := q.db.Exec(ctx, updateUser,
+		arg.ID,
+		arg.Name,
+		arg.Email,
+		arg.Role,
+	)
+	return err
 }

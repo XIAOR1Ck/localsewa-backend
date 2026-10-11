@@ -17,11 +17,12 @@ func NewAuthHandler (authService *service.AuthService) *AuthHandler {
 
 func (h *AuthHandler) EmailRegister (c *gin.Context) {
 	//Get data from request body
-	var data domain.UserRegister
+	var data domain.UserRegisterModel
 	if err:= c.BindJSON(&data); err != nil {
 c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 	}
+
 	token, err := h.authService.CreateUserWEmail(c, data)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

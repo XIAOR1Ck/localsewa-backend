@@ -1,12 +1,25 @@
 package middleware
 
 import (
-	"net/http"
 	"context"
 	"errors"
+	"fmt"
+	"net/http"
+	"os"
 	"strings"
+	"time"
+
 	"github.com/XIAOR1Ck/localsewa-backend/pkg/firebase"
+	"github.com/golang-jwt/jwt/v5"
 )
+
+
+type JWTCustomClaims struct {
+	Id 			string `json:"id"`
+	Email		string `json:"email"`
+	Role 		string `json:"role"`
+	jwt.RegisteredClaims
+}
 
 // Auth Middleware
 type AuthMiddleware struct {
@@ -76,3 +89,31 @@ func (m *AuthMiddleware) extractToken(r *http.Request) (string, error) {
 
 	return token, nil
 }
+
+
+// Generate Token With JWT
+func (m *AuthMiddleware) GenerateJWT(claims JWTCustomClaims) (string, error) {
+	secretKey := os.Getenv("JWT_SECRET")
+// Set standard claims if not already set
+	if claims.ExpiresAt == nil {
+		claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(24 * time.Hour))
+	}
+	if claims.IssuedAt == nil {
+		claims.IssuedAt = jwt.NewNumericDate(time.Now())
+	}
+	if claims.NotBefore == nil {
+		claims.NotBefore = jwt.NewNumericDate(time.Now())
+	}
+
+	// Create token with custom claims
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// Sign the token
+	tokenString, err := token.SignedString([]byte(secretKey))
+	if err != nil {
+		return "", fmt.Errorf("Failed to sign token %w", err)
+	}
+
+	return tokenString, nil
+}
+
