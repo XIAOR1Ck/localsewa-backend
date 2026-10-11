@@ -10,5 +10,5 @@ CREATE TABLE IF NOT EXISTS providers (
 );
 
 -- +goose Down
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS providers;
 

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/XIAOR1Ck/localsewa-backend/internal/domain"
 	"github.com/XIAOR1Ck/localsewa-backend/pkg/firebase"
 	"golang.org/x/crypto/bcrypt"
+	"github.com/jackc/pgx/v5"
 )
 
 
@@ -186,7 +186,7 @@ func (s *AuthService) UserRegisterWEmail(
 	if err == nil {
     // User already exists
     return domain.User{}, errors.New("user with this email already exists")
-} else if err != sql.ErrNoRows {
+} else if err != pgx.ErrNoRows {
     // Some other database error
     return domain.User{}, fmt.Errorf("failed to check existing user: %w", err)
 }
@@ -219,7 +219,7 @@ func (s *AuthService) ProviderRegisterWEmail(
 	if err == nil {
     // User already exists
     return domain.Provider{}, errors.New("user with this email already exists")
-} else if err != sql.ErrNoRows {
+} else if err != pgx.ErrNoRows {
     // Some other database error
     return domain.Provider{}, fmt.Errorf("failed to check existing user: %w", err)
 }

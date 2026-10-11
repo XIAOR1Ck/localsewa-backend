@@ -15,7 +15,7 @@ import (
 
 
 type JWTCustomClaims struct {
-	Id 			string `json:"id"`
+	ID 			string `json:"id"`
 	Email		string `json:"email"`
 	Role 		string `json:"role"`
 	jwt.RegisteredClaims
@@ -92,7 +92,7 @@ func (m *AuthMiddleware) extractToken(r *http.Request) (string, error) {
 
 
 // Generate Token With JWT
-func (m *AuthMiddleware) GenerateJWT(claims JWTCustomClaims) (string, error) {
+func GenerateJWT(claims JWTCustomClaims) (string, error) {
 	secretKey := os.Getenv("JWT_SECRET")
 // Set standard claims if not already set
 	if claims.ExpiresAt == nil {

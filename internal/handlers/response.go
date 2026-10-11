@@ -5,6 +5,7 @@ import "github.com/gin-gonic/gin"
 type Response struct {
 	Success bool `json:"success"`
 	Message string `json:"message"`
+	Token 	string `json:"token,omitempty"`
 	Data    any  `json:"data,omitempty"`
 }
 

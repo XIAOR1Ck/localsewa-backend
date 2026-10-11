@@ -51,7 +51,7 @@ func NewServer (
 	{
 		auth := api.Group("/auth") 
 		{
-			auth.POST("/user/register", handlers.AuthHandler.EmailRegister)
+			auth.POST("/user/register", handlers.AuthHandler.UserRegister)
 		}
 	}
 

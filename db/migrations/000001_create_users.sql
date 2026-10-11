@@ -1,4 +1,3 @@
-
 -- +goose Up
 CREATE TYPE user_role AS ENUM ('admin', 'customer');
 
