@@ -16,6 +16,6 @@ func InitServices(repo *db.Queries, firebase *firebase.Client) *SVC {
 	return &SVC{
 		repo: repo,
 		firebase: firebase,
-		AuthService: NewAuthService(firebase, repo),
+		AuthService: NewAuthService(repo),
 	}
 }

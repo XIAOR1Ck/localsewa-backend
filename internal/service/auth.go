@@ -7,7 +7,6 @@ import (
 
 	"github.com/XIAOR1Ck/localsewa-backend/internal/db"
 	"github.com/XIAOR1Ck/localsewa-backend/internal/domain"
-	"github.com/XIAOR1Ck/localsewa-backend/pkg/firebase"
 	"golang.org/x/crypto/bcrypt"
 	"github.com/jackc/pgx/v5"
 )
@@ -15,13 +14,11 @@ import (
 
 
 type AuthService struct {
-    firebaseClient *firebase.Client
 		repo *db.Queries
 }
 
-func NewAuthService(firebaseClient *firebase.Client, repo *db.Queries) *AuthService {
+func NewAuthService(repo *db.Queries) *AuthService {
     return &AuthService{
-        firebaseClient: firebaseClient,
 				repo: repo,
     }
 }

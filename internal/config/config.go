@@ -14,6 +14,9 @@ type Config struct {
     FirebaseCredentials string
     Environment         string
     LoggerLevel         string
+		JWTSecret 					string
+		JWTIssuer 					string
+		JWTTTL 							time.Duration
 }
 
 func Load() *Config {
@@ -28,6 +31,9 @@ func Load() *Config {
         FirebaseCredentials: getEnv("FIREBASE_CREDENTIALS", ""),
         Environment:         getEnv("ENVIRONMENT", "development"),
         LoggerLevel:         getEnv("LOGGER_LEVEL", "info"),
+				JWTSecret: 					 getEnv("JWT_SECRET", "super_secret_jwt_string"),
+				JWTIssuer: 					 getEnv("JWT_ISSUER", "LocalSewa"),
+				JWTTTL: 						 getEnvAsDuration("JWT_TTL", 7*24*time.Hour),
     }
 }
 

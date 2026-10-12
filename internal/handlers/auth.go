@@ -3,19 +3,20 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/XIAOR1Ck/localsewa-backend/internal/auth"
 	"github.com/XIAOR1Ck/localsewa-backend/internal/domain"
-	"github.com/XIAOR1Ck/localsewa-backend/internal/handlers/middleware"
 	"github.com/XIAOR1Ck/localsewa-backend/internal/service"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 type AuthHandler struct {
  authService *service.AuthService
+ jwtSvc auth.JWTService
 }
 
-func NewAuthHandler (authService *service.AuthService) *AuthHandler {
-	return &AuthHandler{authService: authService}
+
+func NewAuthHandler (authService *service.AuthService, jwtSvc auth.JWTService) *AuthHandler {
+	return &AuthHandler{authService: authService, jwtSvc: jwtSvc}
 }
 
 func (h *AuthHandler) UserRegister (c *gin.Context) {
@@ -33,16 +34,8 @@ c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
 	//Generate JWT
-	claims := middleware.JWTCustomClaims{
-		ID: user.ID,
-		Email: user.Email,
-		Role: user.Role,
-		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:   "localservice",
-			Subject:  "user-auth",
-		},
-	}
-	token, err :=  middleware.GenerateJWT(claims)
+	
+	token, err := h.jwtSvc.Sign(user.ID, user.Email, user.Role)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

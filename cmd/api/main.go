@@ -19,7 +19,7 @@ func main() {
     cfg := config.Load()
 		firebaseClient, err := firebase.NewClient(cfg.FirebaseCredentials)
 		if err != nil {
-			log.Fatalf("Error creating firebase client: %s", err)
+			log.Fatalf("Error creating firebase client: %v", err)
 	}
 
 //Database setup
