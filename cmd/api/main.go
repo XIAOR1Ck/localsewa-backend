@@ -12,7 +12,6 @@ import (
 	"github.com/XIAOR1Ck/localsewa-backend/internal/server"
 	"github.com/XIAOR1Ck/localsewa-backend/internal/service"
 	"github.com/XIAOR1Ck/localsewa-backend/pkg/firebase"
-	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -46,7 +45,7 @@ func main() {
 	svc := service.InitServices(querier, firebaseClient)
 
 	//Handlers
-	handlers := handlers.InitHandlers(svc)
+	handlers := handlers.InitHandlers(svc, jwtSvc)
 
 	// Setup server
 	srv, err := server.NewServerBuilder(cfg).
@@ -57,6 +56,9 @@ func main() {
 		WithHealthCheck().
 		WithAPIRoutes().
 		Build()
+	if err != nil {
+		log.Fatalf("failed to start server:\n%w", err)
+	}
 
 	// Start server
 	if err := srv.Start(); err != nil {

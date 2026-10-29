@@ -7,30 +7,28 @@ import (
 
 	"github.com/XIAOR1Ck/localsewa-backend/internal/db"
 	"github.com/XIAOR1Ck/localsewa-backend/internal/domain"
-	"golang.org/x/crypto/bcrypt"
 	"github.com/jackc/pgx/v5"
+	"golang.org/x/crypto/bcrypt"
 )
 
-
-
 type AuthService struct {
-		repo *db.Queries
+	repo *db.Queries
 }
 
 func NewAuthService(repo *db.Queries) *AuthService {
-    return &AuthService{
-				repo: repo,
-    }
+	return &AuthService{
+		repo: repo,
+	}
 }
 
 func (s *AuthService) hashPassword(password string) (string, error) {
-    bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-    return string(bytes), err
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(bytes), err
 }
 
 func (s *AuthService) CheckPasswordHash(password, hash string) bool {
-    err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-    return err == nil
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }
 
 /* THIS SECTION CONTAINS FIREBASE AUTHENTICATION FUNCTIONS
@@ -181,23 +179,23 @@ func (s *AuthService) UserRegisterWEmail(
 ) (domain.User, error) {
 	_, err := s.repo.GetUserByEmail(ctx, data.Email)
 	if err == nil {
-    // User already exists
-    return domain.User{}, errors.New("user with this email already exists")
-} else if err != pgx.ErrNoRows {
-    // Some other database error
-    return domain.User{}, fmt.Errorf("failed to check existing user: %w", err)
-}
+		// User already exists
+		return domain.User{}, errors.New("user with this email already exists")
+	} else if err != pgx.ErrNoRows {
+		// Some other database error
+		return domain.User{}, fmt.Errorf("failed to check existing user: %w", err)
+	}
 
 	passHash, err := s.hashPassword(data.Password)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("Failed to hash password: %w", err)
 	}
 	userData := db.CreateUserParams{
-		Name: data.Name,
-		Email: data.Email,
+		Name:     data.Name,
+		Email:    data.Email,
 		Password: passHash,
-		Phone: data.Phone,
-		Role: db.UserRoleCustomer,
+		Phone:    data.Phone,
+		Role:     db.UserRoleCustomer,
 	}
 	// Add user to database
 	newUser, err := s.repo.CreateUser(ctx, userData)
@@ -207,36 +205,34 @@ func (s *AuthService) UserRegisterWEmail(
 	return domain.DbUserToModel(newUser), nil
 }
 
-// Register Provider in postgres
-func (s *AuthService) ProviderRegisterWEmail(
-	ctx context.Context,
-	data domain.ProviderRegisterModel,
-) (domain.Provider, error) {
-	_, err := s.repo.GetUserByEmail(ctx, data.Email)
-	if err == nil {
-    // User already exists
-    return domain.Provider{}, errors.New("user with this email already exists")
-} else if err != pgx.ErrNoRows {
-    // Some other database error
-    return domain.Provider{}, fmt.Errorf("failed to check existing user: %w", err)
-}
+// // Register Provider in postgres
+// func (s *AuthService) ProviderRegisterWEmail(
+// 	ctx context.Context,
+// 	data domain.ProviderRegisterModel,
+// ) (domain.Provider, error) {
+// 	_, err := s.repo.GetUserByEmail(ctx, data.Email)
+// 	if err == nil {
+//     // User already exists
+//     return domain.Provider{}, errors.New("user with this email already exists")
+// } else if err != pgx.ErrNoRows {
+//     // Some other database error
+//     return domain.Provider{}, fmt.Errorf("failed to check existing user: %w", err)
+// }
 
-	passHash, err := s.hashPassword(data.Password)
-	if err != nil {
-		return domain.Provider{}, fmt.Errorf("Failed to hash password: %w", err)
-	}
-	userData := db.CreateProviderParams{
-		Name: data.Name,
-		Email: data.Email,
-		Password: passHash,
-		Phone: data.Phone,
-	}
-	// Add user to database
-	newUser, err := s.repo.CreateProvider(ctx, userData)
-	if err != nil {
-		return domain.Provider{}, fmt.Errorf("Failed to create user: %w", err)
-	}
-	return domain.DbProviderToModel(newUser), nil
-}
-
-
+// 	passHash, err := s.hashPassword(data.Password)
+// 	if err != nil {
+// 		return domain.Provider{}, fmt.Errorf("Failed to hash password: %w", err)
+// 	}
+// 	userData := db.CreateProviderParams{
+// 		Name: data.Name,
+// 		Email: data.Email,
+// 		Password: passHash,
+// 		Phone: data.Phone,
+// 	}
+// 	// Add user to database
+// 	newUser, err := s.repo.CreateProvider(ctx, userData)
+// 	if err != nil {
+// 		return domain.Provider{}, fmt.Errorf("Failed to create user: %w", err)
+// 	}
+// 	return domain.DbProviderToModel(newUser), nil
+// }

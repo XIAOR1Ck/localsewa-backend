@@ -1,20 +1,22 @@
 package handlers
 
 import (
+	"github.com/XIAOR1Ck/localsewa-backend/internal/auth"
 	"github.com/XIAOR1Ck/localsewa-backend/internal/service"
 )
 
 type Handlers struct {
-	svc *service.SVC
+	svc         *service.SVC
+	jwtSvc      *auth.JWTService
 	AuthHandler *AuthHandler
 }
 
-func InitHandlers (svc *service.SVC) *Handlers {
+func InitHandlers(svc *service.SVC, jwtSvc *auth.JWTService) *Handlers {
 	return &Handlers{
-		svc: svc,
+		svc:    svc,
+		jwtSvc: jwtSvc,
 		AuthHandler: &AuthHandler{
 			authService: svc.AuthService,
 		},
 	}
 }
-
