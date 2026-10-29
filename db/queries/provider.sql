@@ -2,7 +2,7 @@
 INSERT INTO providers (
   name,
   email,
-  password,
+  password_hash,
   phone
 )
 VALUES (
@@ -12,6 +12,12 @@ VALUES (
   $4
   )
 RETURNING *;
+
+-- name: GetProviderForAuth :one
+SELECT p.id, p.name, p.email, p.password_hash
+FROM providers p
+WHERE email = $1
+LIMIT 1;
 
 -- name: GetProviderByID :one
 SELECT id, email, name, created_at, updated_at

@@ -54,22 +54,52 @@ func (ns NullUserRole) Value() (driver.Value, error) {
 }
 
 type Provider struct {
-	ID        pgtype.UUID
-	Name      string
-	Email     string
-	Password  string
-	Phone     string
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
+	ID           pgtype.UUID
+	Name         string
+	Email        string
+	Phone        string
+	PasswordHash string
+	ProfileImage pgtype.Text
+	Category     pgtype.Text
+	Experience   float32
+	HourlyRate   pgtype.Float4
+	Description  pgtype.Text
+	Rating       float32
+	TotalReviews int32
+	CreatedAt    pgtype.Timestamptz
+	UpdatedAt    pgtype.Timestamptz
+}
+
+type ProviderAddress struct {
+	ID          pgtype.UUID
+	ProviderID  pgtype.UUID
+	AddressLine string
+	City        string
+	Location    interface{}
+	CreatedAt   pgtype.Timestamptz
+	UpdatedAt   pgtype.Timestamptz
 }
 
 type User struct {
-	ID        pgtype.UUID
-	Name      string
-	Email     string
-	Password  string
-	Phone     string
-	Role      UserRole
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
+	ID           pgtype.UUID
+	Name         string
+	Email        string
+	Password     string
+	Phone        string
+	ProfileImage pgtype.Text
+	Role         UserRole
+	CreatedAt    pgtype.Timestamptz
+	UpdatedAt    pgtype.Timestamptz
+}
+
+type UserAddress struct {
+	ID          pgtype.UUID
+	UserID      pgtype.UUID
+	Label       pgtype.Text
+	AddressLine string
+	City        string
+	Location    interface{}
+	IsDefault   bool
+	CreatedAt   pgtype.Timestamptz
+	UpdatedAt   pgtype.Timestamptz
 }

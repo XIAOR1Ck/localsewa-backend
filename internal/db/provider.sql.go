@@ -15,7 +15,7 @@ const createProvider = `-- name: CreateProvider :one
 INSERT INTO providers (
   name,
   email,
-  password,
+  password_hash,
   phone
 )
 VALUES (
@@ -24,21 +24,21 @@ VALUES (
   $3,
   $4
   )
-RETURNING id, name, email, password, phone, created_at, updated_at
+RETURNING id, name, email, phone, password_hash, profile_image, category, experience, hourly_rate, description, rating, total_reviews, created_at, updated_at
 `
 
 type CreateProviderParams struct {
-	Name     string
-	Email    string
-	Password string
-	Phone    string
+	Name         string
+	Email        string
+	PasswordHash string
+	Phone        string
 }
 
 func (q *Queries) CreateProvider(ctx context.Context, arg CreateProviderParams) (Provider, error) {
 	row := q.db.QueryRow(ctx, createProvider,
 		arg.Name,
 		arg.Email,
-		arg.Password,
+		arg.PasswordHash,
 		arg.Phone,
 	)
 	var i Provider
@@ -46,8 +46,15 @@ func (q *Queries) CreateProvider(ctx context.Context, arg CreateProviderParams) 
 		&i.ID,
 		&i.Name,
 		&i.Email,
-		&i.Password,
 		&i.Phone,
+		&i.PasswordHash,
+		&i.ProfileImage,
+		&i.Category,
+		&i.Experience,
+		&i.HourlyRate,
+		&i.Description,
+		&i.Rating,
+		&i.TotalReviews,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -116,6 +123,32 @@ func (q *Queries) GetProviderByID(ctx context.Context, id pgtype.UUID) (GetProvi
 		&i.Name,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getProviderForAuth = `-- name: GetProviderForAuth :one
+SELECT p.id, p.name, p.email, p.password_hash
+FROM providers p
+WHERE email = $1
+LIMIT 1
+`
+
+type GetProviderForAuthRow struct {
+	ID           pgtype.UUID
+	Name         string
+	Email        string
+	PasswordHash string
+}
+
+func (q *Queries) GetProviderForAuth(ctx context.Context, email string) (GetProviderForAuthRow, error) {
+	row := q.db.QueryRow(ctx, getProviderForAuth, email)
+	var i GetProviderForAuthRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.PasswordHash,
 	)
 	return i, err
 }

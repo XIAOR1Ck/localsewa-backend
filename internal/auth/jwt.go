@@ -15,11 +15,11 @@ type JWTCustomClaims struct {
 }
 
 type JWTService struct {	
-	cfg 		config.Config
+	cfg 		*config.Config
 }
 
 func NewJWTService (
-	cfg config.Config,
+	cfg *config.Config,
 ) *JWTService {
 	return &JWTService{
 	cfg: cfg,	
@@ -54,3 +54,38 @@ func (s *JWTService) Sign(ID, email, role string) (string, error) {
 
 	return tokenString, nil
 }
+
+
+func (s *JWTService) Verify(token string) (JWTCustomClaims, error) {
+	secretKey := s.cfg.JWTSecret
+	
+	claims := &JWTCustomClaims{}
+	parsedToken, err := jwt.ParseWithClaims(
+		token, // First parameter should be the token string, not secretKey
+		claims,
+		func(t *jwt.Token) (interface{}, error) {
+			// Verify the signing method
+			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+			}
+			return []byte(secretKey), nil
+		},
+	)
+
+	if err != nil {
+		return JWTCustomClaims{}, fmt.Errorf("error parsing token: %w", err)
+	}
+
+	// Verify token is valid
+	if !parsedToken.Valid {
+		return JWTCustomClaims{}, fmt.Errorf("invalid token")
+	}
+
+	// Type assert to ensure claims are correct
+	if claims, ok := parsedToken.Claims.(*JWTCustomClaims); ok {
+		return *claims, nil
+	}
+
+	return JWTCustomClaims{}, fmt.Errorf("invalid claims type")
+}
+

@@ -56,3 +56,23 @@ func (u User) UpdateWith(opts UpdateUserModel) User {
 
 	return u
 }
+
+type UserBuilder struct {
+	user *User
+}
+
+/*
+
+// Builder function
+func NewUserBuilder() *UserBuilder {
+	return &UserBuilder{
+		user: &User{},
+	}
+}
+
+// Builders
+func (b *UserBuilder) WithId(Id string) *UserBuilder {
+	b.user.ID = Id
+	return b
+}
+*/
