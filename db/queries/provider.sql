@@ -19,31 +19,52 @@ FROM providers p
 WHERE email = $1
 LIMIT 1;
 
+
 -- name: GetProviderByID :one
-SELECT id, email, name, created_at, updated_at
+SELECT
+    id,
+    name,
+    email,
+    phone,
+    profile_image,
+    category,
+    experience,
+    hourly_rate,
+    description,
+    rating,
+    total_reviews,
+    created_at,
+    updated_at
 FROM providers
-WHERE id = $1
-LIMIT 1;
+WHERE id = $1;
+
 
 -- name: GetProviderByEmail :one
 SELECT id, email, name, created_at, updated_at
 FROM providers
-WHERE email = $1
-LIMIT 1;
+WHERE email = $1;
 
--- name: UpdateProvider :exec
-UPDATE providers
-SET name = $2,
-    email = $3,
-    updated_at = NOW()
-WHERE id = $1;
+
 
 -- name: DeleteProvider :exec
 DELETE FROM providers
 WHERE id = $1;
 
--- name: ListProvider :many
-SELECT id, email, name, created_at, updated_at
+
+-- name: GetAllProvider :many
+SELECT
+    id,
+    name,
+    email,
+    phone,
+    profile_image,
+    category,
+    experience,
+    hourly_rate,
+    description,
+    rating,
+    total_reviews,
+    created_at,
+    updated_at
 FROM providers
-ORDER BY created_at DESC
 LIMIT $1 OFFSET $2;

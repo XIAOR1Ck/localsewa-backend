@@ -7,8 +7,9 @@ package db
 
 import (
 	"context"
+	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
 )
 
 const createProvider = `-- name: CreateProvider :one
@@ -28,10 +29,10 @@ RETURNING id, name, email, phone, password_hash, profile_image, category, experi
 `
 
 type CreateProviderParams struct {
-	Name         string
-	Email        string
-	PasswordHash string
-	Phone        string
+	Name         string `json:"name"`
+	Email        string `json:"email"`
+	PasswordHash string `json:"passwordHash"`
+	Phone        string `json:"phone"`
 }
 
 func (q *Queries) CreateProvider(ctx context.Context, arg CreateProviderParams) (Provider, error) {
@@ -66,24 +67,97 @@ DELETE FROM providers
 WHERE id = $1
 `
 
-func (q *Queries) DeleteProvider(ctx context.Context, id pgtype.UUID) error {
+func (q *Queries) DeleteProvider(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, deleteProvider, id)
 	return err
+}
+
+const getAllProvider = `-- name: GetAllProvider :many
+SELECT
+    id,
+    name,
+    email,
+    phone,
+    profile_image,
+    category,
+    experience,
+    hourly_rate,
+    description,
+    rating,
+    total_reviews,
+    created_at,
+    updated_at
+FROM providers
+LIMIT $1 OFFSET $2
+`
+
+type GetAllProviderParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+type GetAllProviderRow struct {
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	Email        string    `json:"email"`
+	Phone        string    `json:"phone"`
+	ProfileImage *string   `json:"profileImage"`
+	Category     *string   `json:"category"`
+	Experience   float32   `json:"experience"`
+	HourlyRate   *float32  `json:"hourlyRate"`
+	Description  *string   `json:"description"`
+	Rating       float32   `json:"rating"`
+	TotalReviews int32     `json:"totalReviews"`
+	CreatedAt    time.Time `json:"createdAt"`
+	UpdatedAt    time.Time `json:"updatedAt"`
+}
+
+func (q *Queries) GetAllProvider(ctx context.Context, arg GetAllProviderParams) ([]GetAllProviderRow, error) {
+	rows, err := q.db.Query(ctx, getAllProvider, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllProviderRow
+	for rows.Next() {
+		var i GetAllProviderRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Email,
+			&i.Phone,
+			&i.ProfileImage,
+			&i.Category,
+			&i.Experience,
+			&i.HourlyRate,
+			&i.Description,
+			&i.Rating,
+			&i.TotalReviews,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getProviderByEmail = `-- name: GetProviderByEmail :one
 SELECT id, email, name, created_at, updated_at
 FROM providers
 WHERE email = $1
-LIMIT 1
 `
 
 type GetProviderByEmailRow struct {
-	ID        pgtype.UUID
-	Email     string
-	Name      string
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
+	ID        uuid.UUID `json:"id"`
+	Email     string    `json:"email"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 func (q *Queries) GetProviderByEmail(ctx context.Context, email string) (GetProviderByEmailRow, error) {
@@ -100,27 +174,55 @@ func (q *Queries) GetProviderByEmail(ctx context.Context, email string) (GetProv
 }
 
 const getProviderByID = `-- name: GetProviderByID :one
-SELECT id, email, name, created_at, updated_at
+SELECT
+    id,
+    name,
+    email,
+    phone,
+    profile_image,
+    category,
+    experience,
+    hourly_rate,
+    description,
+    rating,
+    total_reviews,
+    created_at,
+    updated_at
 FROM providers
 WHERE id = $1
-LIMIT 1
 `
 
 type GetProviderByIDRow struct {
-	ID        pgtype.UUID
-	Email     string
-	Name      string
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	Email        string    `json:"email"`
+	Phone        string    `json:"phone"`
+	ProfileImage *string   `json:"profileImage"`
+	Category     *string   `json:"category"`
+	Experience   float32   `json:"experience"`
+	HourlyRate   *float32  `json:"hourlyRate"`
+	Description  *string   `json:"description"`
+	Rating       float32   `json:"rating"`
+	TotalReviews int32     `json:"totalReviews"`
+	CreatedAt    time.Time `json:"createdAt"`
+	UpdatedAt    time.Time `json:"updatedAt"`
 }
 
-func (q *Queries) GetProviderByID(ctx context.Context, id pgtype.UUID) (GetProviderByIDRow, error) {
+func (q *Queries) GetProviderByID(ctx context.Context, id uuid.UUID) (GetProviderByIDRow, error) {
 	row := q.db.QueryRow(ctx, getProviderByID, id)
 	var i GetProviderByIDRow
 	err := row.Scan(
 		&i.ID,
-		&i.Email,
 		&i.Name,
+		&i.Email,
+		&i.Phone,
+		&i.ProfileImage,
+		&i.Category,
+		&i.Experience,
+		&i.HourlyRate,
+		&i.Description,
+		&i.Rating,
+		&i.TotalReviews,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -135,10 +237,10 @@ LIMIT 1
 `
 
 type GetProviderForAuthRow struct {
-	ID           pgtype.UUID
-	Name         string
-	Email        string
-	PasswordHash string
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	Email        string    `json:"email"`
+	PasswordHash string    `json:"passwordHash"`
 }
 
 func (q *Queries) GetProviderForAuth(ctx context.Context, email string) (GetProviderForAuthRow, error) {
@@ -151,69 +253,4 @@ func (q *Queries) GetProviderForAuth(ctx context.Context, email string) (GetProv
 		&i.PasswordHash,
 	)
 	return i, err
-}
-
-const listProvider = `-- name: ListProvider :many
-SELECT id, email, name, created_at, updated_at
-FROM providers
-ORDER BY created_at DESC
-LIMIT $1 OFFSET $2
-`
-
-type ListProviderParams struct {
-	Limit  int32
-	Offset int32
-}
-
-type ListProviderRow struct {
-	ID        pgtype.UUID
-	Email     string
-	Name      string
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-}
-
-func (q *Queries) ListProvider(ctx context.Context, arg ListProviderParams) ([]ListProviderRow, error) {
-	rows, err := q.db.Query(ctx, listProvider, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ListProviderRow
-	for rows.Next() {
-		var i ListProviderRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.Email,
-			&i.Name,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const updateProvider = `-- name: UpdateProvider :exec
-UPDATE providers
-SET name = $2,
-    email = $3,
-    updated_at = NOW()
-WHERE id = $1
-`
-
-type UpdateProviderParams struct {
-	ID    pgtype.UUID
-	Name  string
-	Email string
-}
-
-func (q *Queries) UpdateProvider(ctx context.Context, arg UpdateProviderParams) error {
-	_, err := q.db.Exec(ctx, updateProvider, arg.ID, arg.Name, arg.Email)
-	return err
 }

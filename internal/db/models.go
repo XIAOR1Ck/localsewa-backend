@@ -7,8 +7,9 @@ package db
 import (
 	"database/sql/driver"
 	"fmt"
+	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
 )
 
 type UserRole string
@@ -31,8 +32,8 @@ func (e *UserRole) Scan(src interface{}) error {
 }
 
 type NullUserRole struct {
-	UserRole UserRole
-	Valid    bool // Valid is true if UserRole is not NULL
+	UserRole UserRole `json:"userRole"`
+	Valid    bool     `json:"valid"` // Valid is true if UserRole is not NULL
 }
 
 // Scan implements the Scanner interface.
@@ -54,52 +55,52 @@ func (ns NullUserRole) Value() (driver.Value, error) {
 }
 
 type Provider struct {
-	ID           pgtype.UUID
-	Name         string
-	Email        string
-	Phone        string
-	PasswordHash string
-	ProfileImage pgtype.Text
-	Category     pgtype.Text
-	Experience   float32
-	HourlyRate   pgtype.Float4
-	Description  pgtype.Text
-	Rating       float32
-	TotalReviews int32
-	CreatedAt    pgtype.Timestamptz
-	UpdatedAt    pgtype.Timestamptz
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	Email        string    `json:"email"`
+	Phone        string    `json:"phone"`
+	PasswordHash string    `json:"passwordHash"`
+	ProfileImage *string   `json:"profileImage"`
+	Category     *string   `json:"category"`
+	Experience   float32   `json:"experience"`
+	HourlyRate   *float32  `json:"hourlyRate"`
+	Description  *string   `json:"description"`
+	Rating       float32   `json:"rating"`
+	TotalReviews int32     `json:"totalReviews"`
+	CreatedAt    time.Time `json:"createdAt"`
+	UpdatedAt    time.Time `json:"updatedAt"`
 }
 
 type ProviderAddress struct {
-	ID          pgtype.UUID
-	ProviderID  pgtype.UUID
-	AddressLine string
-	City        string
-	Location    interface{}
-	CreatedAt   pgtype.Timestamptz
-	UpdatedAt   pgtype.Timestamptz
+	ID          uuid.UUID   `json:"id"`
+	ProviderID  uuid.UUID   `json:"providerId"`
+	AddressLine string      `json:"addressLine"`
+	City        string      `json:"city"`
+	Location    interface{} `json:"location"`
+	CreatedAt   time.Time   `json:"createdAt"`
+	UpdatedAt   time.Time   `json:"updatedAt"`
 }
 
 type User struct {
-	ID           pgtype.UUID
-	Name         string
-	Email        string
-	Password     string
-	Phone        string
-	ProfileImage pgtype.Text
-	Role         UserRole
-	CreatedAt    pgtype.Timestamptz
-	UpdatedAt    pgtype.Timestamptz
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	Email        string    `json:"email"`
+	Password     string    `json:"password"`
+	Phone        string    `json:"phone"`
+	ProfileImage *string   `json:"profileImage"`
+	Role         UserRole  `json:"role"`
+	CreatedAt    time.Time `json:"createdAt"`
+	UpdatedAt    time.Time `json:"updatedAt"`
 }
 
 type UserAddress struct {
-	ID          pgtype.UUID
-	UserID      pgtype.UUID
-	Label       pgtype.Text
-	AddressLine string
-	City        string
-	Location    interface{}
-	IsDefault   bool
-	CreatedAt   pgtype.Timestamptz
-	UpdatedAt   pgtype.Timestamptz
+	ID          uuid.UUID   `json:"id"`
+	UserID      uuid.UUID   `json:"userId"`
+	Label       *string     `json:"label"`
+	AddressLine string      `json:"addressLine"`
+	City        string      `json:"city"`
+	Location    interface{} `json:"location"`
+	IsDefault   bool        `json:"isDefault"`
+	CreatedAt   time.Time   `json:"createdAt"`
+	UpdatedAt   time.Time   `json:"updatedAt"`
 }
