@@ -91,6 +91,8 @@ func (b *ServerBuilder) registerAuthRoutes() {
 	{
 		auth.POST("/user/register", b.handlers.AuthHandler.UserRegister)
 		auth.POST("/user/login", b.handlers.AuthHandler.UserLogin)
+		auth.POST("/provider/resister", b.handlers.AuthHandler.ProviderRegister)
+		auth.POST("/provider/login", b.handlers.AuthHandler.ProviderLogin)
 	}
 }
 

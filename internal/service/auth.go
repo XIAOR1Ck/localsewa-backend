@@ -252,3 +252,20 @@ func (s *AuthService) ProviderRegisterWEmail(
 	}
 	return &newUser, nil
 }
+
+func (s *AuthService) ProviderLogin(
+	ctx context.Context,
+	email string,
+	password string,
+) (*db.GetProviderForAuthRow, error) {
+	user, err := s.repo.GetProviderForAuth(ctx, email)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, errors.New("user not found")
+		} else {
+			return nil, fmt.Errorf("failed to check user: %w", err)
+		}
+	}
+
+	return &user, nil
+}
