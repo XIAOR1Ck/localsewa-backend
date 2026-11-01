@@ -73,3 +73,7 @@ func (b *ProviderBuilder) SetPhone(phone string) *ProviderBuilder {
 	b.provider.Phone = phone
 	return b
 }
+
+func (b *ProviderBuilder) Build() *db.Provider {
+	return b.provider
+}

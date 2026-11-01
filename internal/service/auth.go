@@ -176,19 +176,19 @@ return token, nil
 func (s *AuthService) UserRegisterWEmail(
 	ctx context.Context,
 	data domain.UserRegisterModel,
-) (domain.User, error) {
+) (*db.User, error) {
 	_, err := s.repo.GetUserByEmail(ctx, data.Email)
 	if err == nil {
 		// User already exists
-		return domain.User{}, errors.New("user with this email already exists")
+		return nil, errors.New("user with this email already exists")
 	} else if err != pgx.ErrNoRows {
 		// Some other database error
-		return domain.User{}, fmt.Errorf("failed to check existing user: %w", err)
+		return nil, fmt.Errorf("failed to check existing user: %w", err)
 	}
 
 	passHash, err := s.hashPassword(data.Password)
 	if err != nil {
-		return domain.User{}, fmt.Errorf("Failed to hash password: %w", err)
+		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 	userData := db.CreateUserParams{
 		Name:     data.Name,
@@ -200,39 +200,55 @@ func (s *AuthService) UserRegisterWEmail(
 	// Add user to database
 	newUser, err := s.repo.CreateUser(ctx, userData)
 	if err != nil {
-		return domain.User{}, fmt.Errorf("Failed to create user: %w", err)
+		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
-	return domain.DbUserToModel(newUser), nil
+	return &newUser, nil
 }
 
-// // Register Provider in postgres
-// func (s *AuthService) ProviderRegisterWEmail(
-// 	ctx context.Context,
-// 	data domain.ProviderRegisterModel,
-// ) (domain.Provider, error) {
-// 	_, err := s.repo.GetUserByEmail(ctx, data.Email)
-// 	if err == nil {
-//     // User already exists
-//     return domain.Provider{}, errors.New("user with this email already exists")
-// } else if err != pgx.ErrNoRows {
-//     // Some other database error
-//     return domain.Provider{}, fmt.Errorf("failed to check existing user: %w", err)
-// }
+func (s *AuthService) UserLogin(
+	ctx context.Context,
+	email string,
+	password string,
+) (*db.GetUserByEmailRow, error) {
+	user, err := s.repo.GetUserByEmail(ctx, email)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, errors.New("user not found")
+		} else {
+			return nil, fmt.Errorf("failed to check user: %w", err)
+		}
+	}
+	return &user, nil
+}
 
-// 	passHash, err := s.hashPassword(data.Password)
-// 	if err != nil {
-// 		return domain.Provider{}, fmt.Errorf("Failed to hash password: %w", err)
-// 	}
-// 	userData := db.CreateProviderParams{
-// 		Name: data.Name,
-// 		Email: data.Email,
-// 		Password: passHash,
-// 		Phone: data.Phone,
-// 	}
-// 	// Add user to database
-// 	newUser, err := s.repo.CreateProvider(ctx, userData)
-// 	if err != nil {
-// 		return domain.Provider{}, fmt.Errorf("Failed to create user: %w", err)
-// 	}
-// 	return domain.DbProviderToModel(newUser), nil
-// }
+// Register Provider in postgres
+func (s *AuthService) ProviderRegisterWEmail(
+	ctx context.Context,
+	data domain.ProviderRegisterModel,
+) (*db.Provider, error) {
+	_, err := s.repo.GetUserByEmail(ctx, data.Email)
+	if err == nil {
+		// User already exists
+		return &db.Provider{}, errors.New("user with this email already exists")
+	} else if err != pgx.ErrNoRows {
+		// Some other database error
+		return &db.Provider{}, fmt.Errorf("failed to check existing user: %w", err)
+	}
+
+	passHash, err := s.hashPassword(data.Password)
+	if err != nil {
+		return &db.Provider{}, fmt.Errorf("failed to hash password: %w", err)
+	}
+	userData := db.CreateProviderParams{
+		Name:         data.Name,
+		Email:        data.Email,
+		PasswordHash: passHash,
+		Phone:        data.Phone,
+	}
+	// Add user to database
+	newUser, err := s.repo.CreateProvider(ctx, userData)
+	if err != nil {
+		return &db.Provider{}, fmt.Errorf("failed to create user: %w", err)
+	}
+	return &newUser, nil
+}

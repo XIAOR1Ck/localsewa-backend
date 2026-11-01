@@ -90,6 +90,7 @@ func (b *ServerBuilder) registerAuthRoutes() {
 	auth := b.api.Group("/auth")
 	{
 		auth.POST("/user/register", b.handlers.AuthHandler.UserRegister)
+		auth.POST("/user/login", b.handlers.AuthHandler.UserLogin)
 	}
 }
 

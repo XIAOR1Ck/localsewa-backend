@@ -2,30 +2,7 @@ package domain
 
 import (
 	"github.com/XIAOR1Ck/localsewa-backend/internal/db"
-	"time"
 )
-
-func DbUserToModel(u db.User) User {
-	return User{
-		ID:        u.ID.String(),
-		Email:     u.Email,
-		Name:      u.Name,
-		Role:      string(u.Role),
-		Phone:     u.Phone,
-		CreatedAt: u.CreatedAt,
-		UpdatedAt: u.UpdatedAt,
-	}
-}
-
-type User struct {
-	ID        string    `json:"id"`
-	Email     string    `json:"email"`
-	Name      string    `json:"name"`
-	Phone     string    `json:"phone"`
-	Role      string    `json:"role"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
 
 type UserRegisterModel struct {
 	Email    string `json:"email" binding:"required"`
@@ -40,36 +17,38 @@ type UpdateUserModel struct {
 	Role  *string `json:"role"`
 }
 
-func (u User) UpdateWith(opts UpdateUserModel) User {
-	if opts.Email != nil {
-		u.Email = *opts.Email
-	}
-	if opts.Name != nil {
-		u.Name = *opts.Name
-	}
-	if opts.Role != nil {
-		u.Role = *opts.Role
-	}
-
-	return u
-}
-
 type UserBuilder struct {
-	user *User
+	user *db.User
 }
-
-/*
 
 // Builder function
 func NewUserBuilder() *UserBuilder {
 	return &UserBuilder{
-		user: &User{},
+		user: &db.User{},
 	}
 }
 
 // Builders
-func (b *UserBuilder) WithId(Id string) *UserBuilder {
-	b.user.ID = Id
+func (b *UserBuilder) WithName(name string) *UserBuilder {
+	b.user.Name = name
 	return b
 }
-*/
+
+func (b *UserBuilder) WithEmail(email string) *UserBuilder {
+	b.user.Email = email
+	return b
+}
+
+func (b *UserBuilder) WithPhone(phone string) *UserBuilder {
+	b.user.Phone = phone
+	return b
+}
+
+func (b *UserBuilder) WithProfileImage(img string) *UserBuilder {
+	b.user.ProfileImage = &img
+	return b
+}
+
+func (b *UserBuilder) Build() *db.User {
+	return b.user
+}

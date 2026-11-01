@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/XIAOR1Ck/localsewa-backend/internal/auth"
@@ -23,6 +24,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error creating firebase client: %v", err)
 	}
+	fmt.Printf("%+v", cfg)
 
 	//Database setup
 

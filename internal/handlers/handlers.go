@@ -17,6 +17,7 @@ func InitHandlers(svc *service.SVC, jwtSvc *auth.JWTService) *Handlers {
 		jwtSvc: jwtSvc,
 		AuthHandler: &AuthHandler{
 			authService: svc.AuthService,
+			jwtSvc:      jwtSvc,
 		},
 	}
 }
