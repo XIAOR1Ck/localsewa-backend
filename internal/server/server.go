@@ -76,24 +76,9 @@ func (b *ServerBuilder) WithHealthCheck() *ServerBuilder {
 }
 
 // WithAPIRoutes registers all versioned API routes.
-func (b *ServerBuilder) WithAPIRoutes() *ServerBuilder {
-	b.api = b.engine.Group("/api/v1")
-
-	b.registerAuthRoutes()
-	// b.registerUserRoutes()
-	// add other route groups here
-
+func (b *ServerBuilder) WithBaseRoute(path string) *ServerBuilder {
+	b.api = b.engine.Group(path)
 	return b
-}
-
-func (b *ServerBuilder) registerAuthRoutes() {
-	auth := b.api.Group("/auth")
-	{
-		auth.POST("/user/register", b.handlers.AuthHandler.UserRegister)
-		auth.POST("/user/login", b.handlers.AuthHandler.UserLogin)
-		auth.POST("/provider/resister", b.handlers.AuthHandler.ProviderRegister)
-		auth.POST("/provider/login", b.handlers.AuthHandler.ProviderLogin)
-	}
 }
 
 // Build validates the configuration and returns the Server.

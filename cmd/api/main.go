@@ -56,7 +56,8 @@ func main() {
 		WithHandlers(handlers).
 		WithEngine().
 		WithHealthCheck().
-		WithAPIRoutes().
+		WithBaseRoute("/api/v1").
+		WithAuthRoutes().
 		Build()
 	if err != nil {
 		log.Fatalf("failed to start server:\n%w", err)
