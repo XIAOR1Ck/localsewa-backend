@@ -54,6 +54,12 @@ func (ns NullUserRole) Value() (driver.Value, error) {
 	return string(ns.UserRole), nil
 }
 
+type Category struct {
+	ID          string  `json:"id"`
+	Name        string  `json:"name"`
+	Description *string `json:"description"`
+}
+
 type Provider struct {
 	ID           uuid.UUID `json:"id"`
 	Name         string    `json:"name"`

@@ -72,7 +72,7 @@ func (q *Queries) DeleteProvider(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
-const getAllProvider = `-- name: GetAllProvider :many
+const getAllProviders = `-- name: GetAllProviders :many
 SELECT
     id,
     name,
@@ -88,15 +88,30 @@ SELECT
     created_at,
     updated_at
 FROM providers
-LIMIT $1 OFFSET $2
+WHERE ($1::text[] IS NULL OR category = ANY($1::text[]))
+  AND ($2::real IS NULL OR hourly_rate >= $2::real)
+  AND ($3::real IS NULL OR hourly_rate <= $3::real)
+  AND ($4::real IS NULL OR rating >= $4::real)
+  AND ($5::real IS NULL OR experience >= $5::real)
+  AND ($6::real IS NULL OR experience <= $6::real)
+  AND ($7::text IS NULL OR name ILIKE '%' || $7::text || '%')
+ORDER BY created_at DESC, id
+LIMIT $9 OFFSET $8
 `
 
-type GetAllProviderParams struct {
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
+type GetAllProvidersParams struct {
+	Categories    []string `json:"categories"`
+	MinRate       *float32 `json:"minRate"`
+	MaxRate       *float32 `json:"maxRate"`
+	MinRating     *float32 `json:"minRating"`
+	MinExperience *float32 `json:"minExperience"`
+	MaxExperience *float32 `json:"maxExperience"`
+	Search        *string  `json:"search"`
+	Offset        int32    `json:"offset"`
+	Limit         int32    `json:"limit"`
 }
 
-type GetAllProviderRow struct {
+type GetAllProvidersRow struct {
 	ID           uuid.UUID `json:"id"`
 	Name         string    `json:"name"`
 	Email        string    `json:"email"`
@@ -112,15 +127,25 @@ type GetAllProviderRow struct {
 	UpdatedAt    time.Time `json:"updatedAt"`
 }
 
-func (q *Queries) GetAllProvider(ctx context.Context, arg GetAllProviderParams) ([]GetAllProviderRow, error) {
-	rows, err := q.db.Query(ctx, getAllProvider, arg.Limit, arg.Offset)
+func (q *Queries) GetAllProviders(ctx context.Context, arg GetAllProvidersParams) ([]GetAllProvidersRow, error) {
+	rows, err := q.db.Query(ctx, getAllProviders,
+		arg.Categories,
+		arg.MinRate,
+		arg.MaxRate,
+		arg.MinRating,
+		arg.MinExperience,
+		arg.MaxExperience,
+		arg.Search,
+		arg.Offset,
+		arg.Limit,
+	)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetAllProviderRow
+	var items []GetAllProvidersRow
 	for rows.Next() {
-		var i GetAllProviderRow
+		var i GetAllProvidersRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,

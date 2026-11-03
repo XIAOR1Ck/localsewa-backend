@@ -16,7 +16,9 @@ func (b *ServerBuilder) WithAuthRoutes() *ServerBuilder {
 
 func (b *ServerBuilder) WithProviderRoutes() *ServerBuilder {
 	provider := b.api.Group("/provider")
-	provider.GET("/", b.handlers.ProviderHandler.GetPovidersList)
+	provider.GET("", b.handlers.ProviderHandler.GetPovidersList)
+	provider.POST("/categories", b.handlers.ProviderHandler.AddCategory)
+	provider.GET("/categories", b.handlers.ProviderHandler.GetCategories)
 
 	return b
 }

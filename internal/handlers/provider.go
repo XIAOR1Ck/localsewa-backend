@@ -2,8 +2,9 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 
+	"github.com/XIAOR1Ck/localsewa-backend/internal/db"
+	"github.com/XIAOR1Ck/localsewa-backend/internal/domain"
 	"github.com/XIAOR1Ck/localsewa-backend/internal/service"
 	"github.com/gin-gonic/gin"
 )
@@ -13,20 +14,24 @@ type ProviderHandler struct {
 }
 
 func (h *ProviderHandler) GetPovidersList(c *gin.Context) {
-	limit := c.DefaultQuery("limit", "100")
-	offset := c.DefaultQuery("offset", "0")
+	var data domain.ListProvidersQuery
 
-	//Type conversion of the limit and offset
-	limitInt, err := strconv.Atoi(limit)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": err.Error()})
-		return
-	}
-	offsetInt, err := strconv.Atoi(offset)
-	if err != nil {
+	if err := c.ShouldBind(&data); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": err.Error()})
 	}
-	results, err := h.svc.GetProviderList(c, int32(limitInt), int32(offsetInt))
+	params := db.GetAllProvidersParams{
+		Categories:    data.Categories,
+		MinRate:       data.MinRate,
+		MaxRate:       data.MaxRate,
+		MinRating:     data.MinRating,
+		MinExperience: data.MinExperience,
+		MaxExperience: data.MaxExperience,
+		Search:        data.Search,
+		Limit:         data.Limit,
+		Offset:        (data.Page - 1) * data.Limit,
+	}
+
+	results, err := h.svc.GetProviderList(c, params)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": err.Error()})
 		return
@@ -38,5 +43,37 @@ func (h *ProviderHandler) GetPovidersList(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response)
+
+}
+
+func (h *ProviderHandler) AddCategory(c *gin.Context) {
+	type categoryData struct {
+		Name        string `json:"name" binding:"required"`
+		Description string `json:"description" binding:"required"`
+	}
+	var data categoryData
+	c.BindJSON(&data)
+	category := domain.NewCategory(data.Name, data.Description)
+	cg := db.AddCategoryParams{
+		ID:          category.ID,
+		Name:        category.Name,
+		Description: &category.Description,
+	}
+	newCategory, err := h.svc.AddCategory(c, cg)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, Response{Success: false, Message: "Failed to create category!!"})
+		return
+	}
+	c.JSON(http.StatusCreated, Response{Success: true, Message: "Category created successful", Data: newCategory})
+
+}
+
+func (h *ProviderHandler) GetCategories(c *gin.Context) {
+	categories, err := h.svc.GetCategories(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, Response{Success: false, Message: "failed to get categories"})
+		return
+	}
+	c.JSON(http.StatusOK, Response{Success: true, Message: "Categories fetched successfully!", Data: categories})
 
 }

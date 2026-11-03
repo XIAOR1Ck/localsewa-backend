@@ -38,6 +38,18 @@ type ProviderRegisterModel struct {
 	Password string `json:"password" binding:"required"`
 }
 
+type ListProvidersQuery struct {
+	Categories    []string `form:"category" collection_format:"csv"`
+	MinRate       *float32 `form:"min_rate" binding:"omitempty,gte=0"`
+	MaxRate       *float32 `form:"max_rate" binding:"omitempty,gte=0"`
+	MinRating     *float32 `form:"min_rating" binding:"omitempty,gte=0,lte=5"`
+	MinExperience *float32 `form:"min_experience" binding:"omitempty,gte=0"`
+	MaxExperience *float32 `form:"max_experience" binding:"omitempty,gte=0"`
+	Search        *string  `form:"search"`
+	Page          int32    `form:"page,default=1" binding:"gte=1"`
+	Limit         int32    `form:"limit,default=20" binding:"gte=1,lte=100"`
+}
+
 type ProviderBuilder struct {
 	provider *db.Provider
 }

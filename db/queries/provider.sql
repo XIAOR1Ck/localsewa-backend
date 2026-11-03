@@ -51,7 +51,9 @@ DELETE FROM providers
 WHERE id = $1;
 
 
--- name: GetAllProvider :many
+
+
+-- name: GetAllProviders :many
 SELECT
     id,
     name,
@@ -67,4 +69,12 @@ SELECT
     created_at,
     updated_at
 FROM providers
-LIMIT $1 OFFSET $2;
+WHERE (sqlc.narg('categories')::text[] IS NULL OR category = ANY(sqlc.narg('categories')::text[]))
+  AND (sqlc.narg('min_rate')::real IS NULL OR hourly_rate >= sqlc.narg('min_rate')::real)
+  AND (sqlc.narg('max_rate')::real IS NULL OR hourly_rate <= sqlc.narg('max_rate')::real)
+  AND (sqlc.narg('min_rating')::real IS NULL OR rating >= sqlc.narg('min_rating')::real)
+  AND (sqlc.narg('min_experience')::real IS NULL OR experience >= sqlc.narg('min_experience')::real)
+  AND (sqlc.narg('max_experience')::real IS NULL OR experience <= sqlc.narg('max_experience')::real)
+  AND (sqlc.narg('search')::text IS NULL OR name ILIKE '%' || sqlc.narg('search')::text || '%')
+ORDER BY created_at DESC, id
+LIMIT sqlc.arg('limit') OFFSET sqlc.arg('offset');
