@@ -226,18 +226,18 @@ func (s *AuthService) ProviderRegisterWEmail(
 	ctx context.Context,
 	data domain.ProviderRegisterModel,
 ) (*db.Provider, error) {
-	_, err := s.repo.GetUserByEmail(ctx, data.Email)
+	_, err := s.repo.GetProviderByEmail(ctx, data.Email)
 	if err == nil {
 		// User already exists
-		return &db.Provider{}, errors.New("user with this email already exists")
+		return nil, errors.New("user with this email already exists")
 	} else if err != pgx.ErrNoRows {
 		// Some other database error
-		return &db.Provider{}, fmt.Errorf("failed to check existing user: %w", err)
+		return nil, fmt.Errorf("failed to check existing user: %w", err)
 	}
 
 	passHash, err := s.hashPassword(data.Password)
 	if err != nil {
-		return &db.Provider{}, fmt.Errorf("failed to hash password: %w", err)
+		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 	userData := db.CreateProviderParams{
 		Name:         data.Name,

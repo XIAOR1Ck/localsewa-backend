@@ -13,3 +13,10 @@ func (b *ServerBuilder) WithAuthRoutes() *ServerBuilder {
 
 	return b
 }
+
+func (b *ServerBuilder) WithProviderRoutes() *ServerBuilder {
+	provider := b.api.Group("/provider")
+	provider.GET("/", b.handlers.ProviderHandler.GetPovidersList)
+
+	return b
+}

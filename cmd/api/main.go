@@ -58,6 +58,7 @@ func main() {
 		WithHealthCheck().
 		WithBaseRoute("/api/v1").
 		WithAuthRoutes().
+		WithProviderRoutes().
 		Build()
 	if err != nil {
 		log.Fatalf("failed to start server:\n%w", err)

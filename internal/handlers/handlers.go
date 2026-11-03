@@ -6,9 +6,10 @@ import (
 )
 
 type Handlers struct {
-	svc         *service.SVC
-	jwtSvc      *auth.JWTService
-	AuthHandler *AuthHandler
+	svc             *service.SVC
+	jwtSvc          *auth.JWTService
+	AuthHandler     *AuthHandler
+	ProviderHandler *ProviderHandler
 }
 
 func InitHandlers(svc *service.SVC, jwtSvc *auth.JWTService) *Handlers {
@@ -18,6 +19,9 @@ func InitHandlers(svc *service.SVC, jwtSvc *auth.JWTService) *Handlers {
 		AuthHandler: &AuthHandler{
 			authService: svc.AuthService,
 			jwtSvc:      jwtSvc,
+		},
+		ProviderHandler: &ProviderHandler{
+			svc: svc.ProviderService,
 		},
 	}
 }

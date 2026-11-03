@@ -6,16 +6,18 @@ import (
 )
 
 type SVC struct {
-	repo *db.Queries
-	firebase  *firebase.Client
-	AuthService *AuthService
+	repo            *db.Queries
+	firebase        *firebase.Client
+	AuthService     *AuthService
+	ProviderService *ProviderService
 	// Add other services here
 }
 
 func InitServices(repo *db.Queries, firebase *firebase.Client) *SVC {
 	return &SVC{
-		repo: repo,
-		firebase: firebase,
-		AuthService: NewAuthService(repo),
+		repo:            repo,
+		firebase:        firebase,
+		AuthService:     NewAuthService(repo),
+		ProviderService: NewProviderService(repo),
 	}
 }
