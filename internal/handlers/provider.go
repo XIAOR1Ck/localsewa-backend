@@ -7,6 +7,7 @@ import (
 	"github.com/XIAOR1Ck/localsewa-backend/internal/domain"
 	"github.com/XIAOR1Ck/localsewa-backend/internal/service"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type ProviderHandler struct {
@@ -76,4 +77,25 @@ func (h *ProviderHandler) GetCategories(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, Response{Success: true, Message: "Categories fetched successfully!", Data: categories})
 
+}
+
+func (h *ProviderHandler) UpdateProvider(c *gin.Context) {
+	id := c.Param("id")
+	var userData db.UpdateProviderParams
+	c.BindJSON(&userData)
+	uid, err := uuid.Parse(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, Response{Success: false, Message: "invalid user id"})
+	}
+	userData.ID = uid
+	n, err := h.svc.UpdateProvier(c, userData)
+	if n == 0 {
+		c.JSON(http.StatusBadRequest, Response{Success: false, Message: "Invalid User"})
+		return
+	}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, Response{Success: false, Message: "failed to update user"})
+		return
+	}
+	c.JSON(http.StatusNoContent, Response{Success: true, Message: "Provider Updated Successfully!"})
 }

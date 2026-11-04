@@ -39,11 +39,6 @@ FROM providers
 WHERE id = $1;
 
 
--- name: GetProviderByEmail :one
-SELECT id, email, name, created_at, updated_at
-FROM providers
-WHERE email = $1;
-
 
 
 -- name: DeleteProvider :exec
@@ -78,3 +73,20 @@ WHERE (sqlc.narg('categories')::text[] IS NULL OR category = ANY(sqlc.narg('cate
   AND (sqlc.narg('search')::text IS NULL OR name ILIKE '%' || sqlc.narg('search')::text || '%')
 ORDER BY created_at DESC, id
 LIMIT sqlc.arg('limit') OFFSET sqlc.arg('offset');
+
+
+-- name: UpdateProvider :execrows
+UPDATE providers
+SET
+    name = COALESCE(sqlc.narg('name'), name),
+    email = COALESCE(sqlc.narg('email'), email),
+    phone = COALESCE(sqlc.narg('phone'), phone),
+    profile_image = COALESCE(sqlc.narg('profile_image'), profile_image),
+    category = COALESCE(sqlc.narg('category'), category),
+    experience = COALESCE(sqlc.narg('experience'), experience),
+    hourly_rate = COALESCE(sqlc.narg('hourly_rate'), hourly_rate),
+    description = COALESCE(sqlc.narg('description'), description),
+    rating = COALESCE(sqlc.narg('rating'), rating),
+    total_reviews = COALESCE(sqlc.narg('total_reviews'), total_reviews),
+    updated_at = NOW()
+WHERE id = sqlc.arg('id');

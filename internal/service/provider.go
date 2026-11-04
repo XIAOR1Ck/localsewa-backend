@@ -35,3 +35,8 @@ func (s *ProviderService) GetCategories(ctx context.Context) (*[]db.Category, er
 	categories, err := s.repo.GetAllCategories(ctx)
 	return &categories, err
 }
+
+func (s *ProviderService) UpdateProvier(ctx context.Context, data db.UpdateProviderParams) (int64, error) {
+	n, err := s.repo.UpdateProvider(ctx, data)
+	return n, err
+}

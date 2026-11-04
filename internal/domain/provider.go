@@ -50,42 +50,42 @@ type ListProvidersQuery struct {
 	Limit         int32    `form:"limit,default=20" binding:"gte=1,lte=100"`
 }
 
-type ProviderBuilder struct {
-	provider *db.Provider
+type ProviderUpdateBuilder struct {
+	provider *db.GetProviderByIDRow
 }
 
-func (b *ProviderBuilder) SetName(name string) *ProviderBuilder {
+func (b *ProviderUpdateBuilder) SetName(name string) *ProviderUpdateBuilder {
 	b.provider.Name = name
 	return b
 }
-func (b *ProviderBuilder) SetCategory(id string) *ProviderBuilder {
+func (b *ProviderUpdateBuilder) SetCategory(id string) *ProviderUpdateBuilder {
 	b.provider.Category = &id
 	return b
 }
-func (b *ProviderBuilder) SetHourlyRate(rate float32) *ProviderBuilder {
+func (b *ProviderUpdateBuilder) SetHourlyRate(rate float32) *ProviderUpdateBuilder {
 	b.provider.HourlyRate = &rate
 	return b
 }
-func (b *ProviderBuilder) SetEmail(email string) *ProviderBuilder {
+func (b *ProviderUpdateBuilder) SetEmail(email string) *ProviderUpdateBuilder {
 	b.provider.Email = email
 	return b
 }
 
-func (b *ProviderBuilder) SetDescription(desc string) *ProviderBuilder {
+func (b *ProviderUpdateBuilder) SetDescription(desc string) *ProviderUpdateBuilder {
 	b.provider.Description = &desc
 	return b
 }
 
-func (b *ProviderBuilder) SetExperience(experience float32) *ProviderBuilder {
+func (b *ProviderUpdateBuilder) SetExperience(experience float32) *ProviderUpdateBuilder {
 	b.provider.Experience = experience
 	return b
 }
 
-func (b *ProviderBuilder) SetPhone(phone string) *ProviderBuilder {
+func (b *ProviderUpdateBuilder) SetPhone(phone string) *ProviderUpdateBuilder {
 	b.provider.Phone = phone
 	return b
 }
 
-func (b *ProviderBuilder) Build() *db.Provider {
+func (b *ProviderUpdateBuilder) Build() *db.GetProviderByIDRow {
 	return b.provider
 }

@@ -171,33 +171,6 @@ func (q *Queries) GetAllProviders(ctx context.Context, arg GetAllProvidersParams
 	return items, nil
 }
 
-const getProviderByEmail = `-- name: GetProviderByEmail :one
-SELECT id, email, name, created_at, updated_at
-FROM providers
-WHERE email = $1
-`
-
-type GetProviderByEmailRow struct {
-	ID        uuid.UUID `json:"id"`
-	Email     string    `json:"email"`
-	Name      string    `json:"name"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-}
-
-func (q *Queries) GetProviderByEmail(ctx context.Context, email string) (GetProviderByEmailRow, error) {
-	row := q.db.QueryRow(ctx, getProviderByEmail, email)
-	var i GetProviderByEmailRow
-	err := row.Scan(
-		&i.ID,
-		&i.Email,
-		&i.Name,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
 const getProviderByID = `-- name: GetProviderByID :one
 SELECT
     id,
@@ -278,4 +251,55 @@ func (q *Queries) GetProviderForAuth(ctx context.Context, email string) (GetProv
 		&i.PasswordHash,
 	)
 	return i, err
+}
+
+const updateProvider = `-- name: UpdateProvider :execrows
+UPDATE providers
+SET
+    name = COALESCE($1, name),
+    email = COALESCE($2, email),
+    phone = COALESCE($3, phone),
+    profile_image = COALESCE($4, profile_image),
+    category = COALESCE($5, category),
+    experience = COALESCE($6, experience),
+    hourly_rate = COALESCE($7, hourly_rate),
+    description = COALESCE($8, description),
+    rating = COALESCE($9, rating),
+    total_reviews = COALESCE($10, total_reviews),
+    updated_at = NOW()
+WHERE id = $11
+`
+
+type UpdateProviderParams struct {
+	Name         *string   `json:"name"`
+	Email        *string   `json:"email"`
+	Phone        *string   `json:"phone"`
+	ProfileImage *string   `json:"profileImage"`
+	Category     *string   `json:"category"`
+	Experience   *float32  `json:"experience"`
+	HourlyRate   *float32  `json:"hourlyRate"`
+	Description  *string   `json:"description"`
+	Rating       *float32  `json:"rating"`
+	TotalReviews *int32    `json:"totalReviews"`
+	ID           uuid.UUID `json:"id"`
+}
+
+func (q *Queries) UpdateProvider(ctx context.Context, arg UpdateProviderParams) (int64, error) {
+	result, err := q.db.Exec(ctx, updateProvider,
+		arg.Name,
+		arg.Email,
+		arg.Phone,
+		arg.ProfileImage,
+		arg.Category,
+		arg.Experience,
+		arg.HourlyRate,
+		arg.Description,
+		arg.Rating,
+		arg.TotalReviews,
+		arg.ID,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }

@@ -19,6 +19,7 @@ func (b *ServerBuilder) WithProviderRoutes() *ServerBuilder {
 	provider.GET("", b.handlers.ProviderHandler.GetPovidersList)
 	provider.POST("/categories", b.handlers.ProviderHandler.AddCategory)
 	provider.GET("/categories", b.handlers.ProviderHandler.GetCategories)
+	provider.PATCH("/:id", b.middleware.Require(), b.middleware.RequireRole("provider"), b.handlers.ProviderHandler.UpdateProvider)
 
 	return b
 }
