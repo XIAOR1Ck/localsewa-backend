@@ -15,6 +15,14 @@ VALUES (
   )
 RETURNING *;
 
+
+-- name: GetUserForAuth :one
+SELECT id, name, email, password
+FROM users
+WHERE email = $1
+LIMIT 1;
+
+
 -- name: GetUserByID :one
 SELECT id, email, name, role, created_at, updated_at
 FROM users

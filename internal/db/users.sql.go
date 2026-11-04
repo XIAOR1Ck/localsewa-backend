@@ -131,6 +131,32 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (GetUserByIDRow
 	return i, err
 }
 
+const getUserForAuth = `-- name: GetUserForAuth :one
+SELECT id, name, email, password
+FROM users
+WHERE email = $1
+LIMIT 1
+`
+
+type GetUserForAuthRow struct {
+	ID       uuid.UUID `json:"id"`
+	Name     string    `json:"name"`
+	Email    string    `json:"email"`
+	Password string    `json:"password"`
+}
+
+func (q *Queries) GetUserForAuth(ctx context.Context, email string) (GetUserForAuthRow, error) {
+	row := q.db.QueryRow(ctx, getUserForAuth, email)
+	var i GetUserForAuthRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Password,
+	)
+	return i, err
+}
+
 const listUsers = `-- name: ListUsers :many
 SELECT id, email, name, role, created_at, updated_at
 FROM users

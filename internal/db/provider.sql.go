@@ -171,6 +171,36 @@ func (q *Queries) GetAllProviders(ctx context.Context, arg GetAllProvidersParams
 	return items, nil
 }
 
+const getProviderByEmail = `-- name: GetProviderByEmail :one
+SELECT p.id, p.name, p.email, p.phone, p.created_at, p.updated_at
+FROM providers p
+WHERE email = $1
+LIMIT 1
+`
+
+type GetProviderByEmailRow struct {
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Phone     string    `json:"phone"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+func (q *Queries) GetProviderByEmail(ctx context.Context, email string) (GetProviderByEmailRow, error) {
+	row := q.db.QueryRow(ctx, getProviderByEmail, email)
+	var i GetProviderByEmailRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Phone,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getProviderByID = `-- name: GetProviderByID :one
 SELECT
     id,

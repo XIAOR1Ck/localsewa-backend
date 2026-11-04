@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/XIAOR1Ck/localsewa-backend/internal/auth"
+	"github.com/XIAOR1Ck/localsewa-backend/internal/db"
 	"github.com/XIAOR1Ck/localsewa-backend/internal/domain"
 	"github.com/XIAOR1Ck/localsewa-backend/internal/service"
 	"github.com/gin-gonic/gin"
@@ -41,11 +43,15 @@ func (h *AuthHandler) UserRegister(c *gin.Context) {
 
 	}
 
+	var responseUser db.GetUserByEmailRow
+	jsonData, _ := json.Marshal(user)
+	json.Unmarshal(jsonData, &responseUser)
+
 	res := Response{
 		Success: true,
 		Message: "User Created Successfully!!",
 		Token:   token,
-		Data:    user,
+		Data:    responseUser,
 	}
 
 	c.JSON(http.StatusOK, res)
@@ -111,11 +117,15 @@ func (h *AuthHandler) ProviderRegister(c *gin.Context) {
 
 	}
 
+	var responseProvider db.GetProviderByEmailRow
+	jsonData, _ := json.Marshal(provider)
+	json.Unmarshal(jsonData, &responseProvider)
+
 	res := Response{
 		Success: true,
 		Message: "provider login Successful!!",
 		Token:   token,
-		Data:    provider,
+		Data:    responseProvider,
 	}
 
 	c.JSON(http.StatusOK, res)

@@ -20,6 +20,12 @@ WHERE email = $1
 LIMIT 1;
 
 
+-- name: GetProviderByEmail :one
+SELECT p.id, p.name, p.email, p.phone, p.created_at, p.updated_at
+FROM providers p
+WHERE email = $1
+LIMIT 1;
+
 -- name: GetProviderByID :one
 SELECT
     id,

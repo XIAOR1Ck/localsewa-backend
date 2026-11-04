@@ -210,15 +210,20 @@ func (s *AuthService) UserLogin(
 	email string,
 	password string,
 ) (*db.GetUserByEmailRow, error) {
-	user, err := s.repo.GetUserByEmail(ctx, email)
+	user, err := s.repo.GetUserForAuth(ctx, email)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, errors.New("user not found")
+			return nil, errors.New("invalid email or password")
 		} else {
 			return nil, fmt.Errorf("failed to check user: %w", err)
 		}
 	}
-	return &user, nil
+	valid := s.CheckPasswordHash(password, user.Password)
+	if !valid {
+		return nil, errors.New("invalid email or password")
+	}
+	data, _ := s.repo.GetUserByEmail(ctx, email)
+	return &data, nil
 }
 
 // Register Provider in postgres
@@ -226,7 +231,7 @@ func (s *AuthService) ProviderRegisterWEmail(
 	ctx context.Context,
 	data domain.ProviderRegisterModel,
 ) (*db.Provider, error) {
-	_, err := s.repo.GetProviderByEmail(ctx, data.Email)
+	_, err := s.repo.GetProviderForAuth(ctx, data.Email)
 	if err == nil {
 		// User already exists
 		return nil, errors.New("user with this email already exists")
@@ -257,15 +262,20 @@ func (s *AuthService) ProviderLogin(
 	ctx context.Context,
 	email string,
 	password string,
-) (*db.GetProviderForAuthRow, error) {
+) (*db.GetProviderByEmailRow, error) {
 	user, err := s.repo.GetProviderForAuth(ctx, email)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, errors.New("user not found")
+			return nil, errors.New("invalid email or password")
 		} else {
 			return nil, fmt.Errorf("failed to check user: %w", err)
 		}
 	}
+	valid := s.CheckPasswordHash(password, user.PasswordHash)
+	if !valid {
+		return nil, errors.New("invalid email or pasword")
+	}
+	data, _ := s.repo.GetProviderByEmail(ctx, email)
 
-	return &user, nil
+	return &data, nil
 }
