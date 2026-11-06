@@ -17,6 +17,8 @@ type Config struct {
 	JWTSecret           string
 	JWTIssuer           string
 	JWTTTL              time.Duration
+	SMTPUser            string
+	SMTPPass            string
 }
 
 func Load() *Config {
@@ -34,6 +36,8 @@ func Load() *Config {
 		JWTSecret:           getEnv("JWT_SECRET", "super_secret_jwt_string"),
 		JWTIssuer:           getEnv("JWT_ISSUER", "LocalSewa"),
 		JWTTTL:              getEnvAsDuration("JWT_TTL", 7*24*time.Hour),
+		SMTPUser:            getEnv("SMTP_USER", ""),
+		SMTPPass:            getEnv("SMTP_PASS", ""),
 	}
 }
 
